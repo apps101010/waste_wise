@@ -1,10 +1,13 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:waste_wise/activities/login_screen.dart';
 import 'package:waste_wise/activities/signup_screen.dart';
 import 'package:waste_wise/activities/splash_screen.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+   await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

@@ -1,10 +1,14 @@
 import 'dart:ffi';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/route_manager.dart';
 import 'package:waste_wise/activities/login_screen.dart';
 import 'package:waste_wise/util/custom_colors.dart';
+import 'package:waste_wise/util/custom_snackbar.dart';
+import 'package:waste_wise/util/progress_dialog.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,6 +20,14 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   RxBool _isPassowrdVisible = true.obs;
   RxBool _isConfirmPasswordVisible = true.obs;
+
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  final _formKey = GlobalKey<FormState>();
+  var email = TextEditingController();
+  var password = TextEditingController();
+  var fullName = TextEditingController();
+  var confirmPassword = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +69,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 30),
 
                   // Email text field section
-                  const TextField(
-                    decoration: InputDecoration(
+                   TextField(
+                    controller: email,
+                    decoration: const InputDecoration(
                       labelText: 'Email or Phone Number',
                       labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
                       enabledBorder: UnderlineInputBorder(
@@ -72,8 +85,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 5),
 
                   // Full name section
-                  const TextField(
-                    decoration: InputDecoration(
+                   TextField(
+                     controller: fullName,
+                    decoration: const InputDecoration(
                       labelText: 'Full Name',
                       labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
                       enabledBorder: UnderlineInputBorder(
@@ -91,6 +105,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Obx(() => TextField(
+                        controller: password,
                         obscureText: _isPassowrdVisible.value,
                         decoration: InputDecoration(
                           labelText: 'Password',
@@ -133,6 +148,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Obx(() => TextField(
+                        controller: confirmPassword,
                         obscureText: _isConfirmPasswordVisible.value,
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
@@ -174,7 +190,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if(_validateFields()){
+                          signUpUser();
+                        }
+
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: CustomColors.mainButtonColor,
                         shape: const RoundedRectangleBorder(
@@ -204,7 +225,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Get.to(const LoginScreen());
+                            Get.to(() => const LoginScreen());
 
                           },
                           child: const Text(
@@ -226,5 +247,78 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  bool _validateFields() {
+    if (email.text.isEmpty) {
+      CustomSnackbar.showSnackbar("Enter Email", "Please enter your email");
+      return false;
+    } else if (fullName.text.isEmpty) {
+      CustomSnackbar.showSnackbar("Enter Name", "Please enter your name");
+      return false;
+    }  else if (password.text.isEmpty) {
+      CustomSnackbar.showSnackbar("Enter Password", "Please enter your password");
+      return false;
+    } else if (confirmPassword.text.isEmpty) {
+      CustomSnackbar.showSnackbar("Confirm Password", "Please enter your password again");
+      return false;
+    }else if(!_isPasswordValid()){
+      CustomSnackbar.showSnackbar("OOPS!", "password should be 6 characters long and must contain at least one number");
+      return false;
+  } else if(password.text.toString() != confirmPassword.text.toString()){
+      CustomSnackbar.showSnackbar("OOPS!", "Your password does not match");
+      return false;
+    }else{
+      return true;
+    }
+  }
+
+  bool _isPasswordValid() {
+    return RegExp(r'^(?=.*[0-9])[a-zA-Z0-9]{6,}$').hasMatch(password.text.toString());
+  }
+
+  void signUpUser() async {
+    CustomProgressDialog.showProgressDialog("Please Wait", "We are checking your details");
+      try {
+        // Create user with Firebase Authentication
+        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email.text.toString(),
+          password: password.text.toString(),
+        );
+
+        // Get the created user's UID
+        String uid = userCredential.user!.uid;
+
+        // Store additional data in Firestore
+        await _firestore.collection('users').doc(uid).set({
+          'fullName': fullName.text.toString(),
+          'email': email.text.toString(),
+          'role': 'moderator',
+        });
+
+        // You can also navigate to a different screen after successful signup
+        // Navigator.of(context).pushReplacement(
+        //   MaterialPageRoute(builder: (context) => SuccessScreen()),
+        // );
+        Get.back();
+        Get.back();
+        CustomSnackbar.showSnackbar("Success", "You have registered Successfully");
+        print('Signup success');
+      } catch (e) {
+        Get.back();
+        if (e is FirebaseAuthException) {
+          if(e.code == "email-already-in-use"){
+            CustomSnackbar.showSnackbar("Account Exist", "The email address is already in use by another account");
+          }
+          print('Error code: ${e.code}');
+          print('Error message: ${e.message}');
+          print('Error stackTrace: ${e.stackTrace}');
+        } else {
+          CustomSnackbar.showSnackbar('OOPS!!', "Firebase Internal Error");
+          print('General error: ${e.toString()}');
+        }
+        print({e.toString()});
+        // Handle errors (e.g., show a dialog with the error message)
+      }
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -8,8 +10,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/route_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waste_wise/activities/admin_home_screen.dart';
+import 'package:waste_wise/activities/moderator_home_screen.dart';
 import 'package:waste_wise/activities/signup_screen.dart';
 import 'package:waste_wise/util/custom_colors.dart';
+import 'package:waste_wise/util/custom_snackbar.dart';
+import 'package:waste_wise/util/progress_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +27,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   RxBool _isPassowrdVisible = true.obs;
+
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  var email = TextEditingController();
+  var password = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Welcome Text Section
                   const Text(
-                    'WELCOME',
+                    'WELCOM',
                     style: TextStyle(
                       fontSize: 35,
                       fontWeight: FontWeight.bold,
@@ -60,8 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 30),
 
                   // Username, Email text field section
-                  const TextField(
-                    decoration: InputDecoration(
+                   TextField(
+                     controller: email,
+                    decoration: const InputDecoration(
                       labelText: 'Username, Email or Phone Number',
                       labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
                       enabledBorder: UnderlineInputBorder(
@@ -76,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // password text field section
                    Obx(() => TextField(
+                     controller: password,
                      obscureText: _isPassowrdVisible.value,
                      decoration: InputDecoration(
                        labelText: 'Password',
@@ -106,7 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if(_validateFields()){
+                          signInUser();
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: CustomColors.mainButtonColor,
                         shape: const RoundedRectangleBorder(
@@ -136,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                        ),
                         GestureDetector(
                           onTap: () {
-                            Get.to(const SignupScreen());
+                            Get.to(() => const SignupScreen());
 
                           },
                           child: const Text(
@@ -159,4 +178,61 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  bool _validateFields() {
+    if (email.text.isEmpty) {
+      CustomSnackbar.showSnackbar("Enter Email", "Please enter your email");
+      return false;
+    }   else if (password.text.isEmpty) {
+      CustomSnackbar.showSnackbar("Enter Password", "Please enter your password");
+      return false;
+    }else{
+      return true;
+    }
+  }
+
+  void signInUser() async {
+    CustomProgressDialog.showProgressDialog("Please Wait", "We are checking your credentials");
+    try {
+      UserCredential userCredential =  await _auth.signInWithEmailAndPassword(email: email.text.toString(), password: password.text.toString());
+      String userId =  userCredential.user!.uid;
+      DocumentSnapshot userDoc =
+      await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+
+        var userData = userDoc.data() as Map<String, dynamic>;
+        String fullName = userData['fullName'];
+        String email = userData['email'];
+        String role = userData['role'];
+
+        print('UID: $userId');
+        print('Full Name: $fullName');
+        print('Email: $email');
+        print('Role: $role');
+        SharedPreferences.setMockInitialValues({});
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("uid", userId);
+        prefs.setString("username", fullName);
+        prefs.setString("email", email);
+        prefs.setString("role", role);
+
+        Get.back();
+        CustomSnackbar.showSnackbar('Success', "You are logged in successfully");
+        if(role == "moderator"){
+          Get.off(() => const ModeratorHomeScreen());
+        }else{
+          Get.off(() => const AdminHomeScreen());
+        }
+        print('sigin success');
+      } else {
+        print('User data not found in Firestore');
+      }
+
+    } catch (e) {
+      Get.back();
+      CustomSnackbar.showSnackbar('OOPS!', "username or password is incorrect");
+      print(e);
+    }
+  }
+
 }
