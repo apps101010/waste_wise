@@ -296,10 +296,6 @@ class _SignupScreenState extends State<SignupScreen> {
           'role': 'moderator',
         });
 
-        // You can also navigate to a different screen after successful signup
-        // Navigator.of(context).pushReplacement(
-        //   MaterialPageRoute(builder: (context) => SuccessScreen()),
-        // );
         Get.back();
         Get.back();
         CustomSnackbar.showSnackbar("Success", "You have registered Successfully");
