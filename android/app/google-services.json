@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992542002602",
+    "project_id": "waste-wise-db410",
+    "storage_bucket": "waste-wise-db410.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992542002602:android:cac7dee06f721604b5afd3",
+        "android_client_info": {
+          "package_name": "com.waste.waste_wise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwdDeSurZMv_swhjnJPve8eBhWGcNpCAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

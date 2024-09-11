@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:waste_wise/activities/nearest_food_bin.dart';
+import 'package:waste_wise/activities/nearest_food_bin_on_map.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
 import 'package:waste_wise/util/custom_colors.dart';
 
@@ -61,22 +64,27 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(40.0),
-      margin: const EdgeInsets.only(left: 40.0,right: 40.0),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: CustomColors.mainButtonColor,
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
+    return InkWell(
+      onTap: (){
+        Get.to(() => NearestFoodBin());
+      },
+      child: Container(
+        padding: const EdgeInsets.all(40.0),
+        margin: const EdgeInsets.only(left: 40.0,right: 40.0),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: CustomColors.mainButtonColor,
+          borderRadius: BorderRadius.circular(40),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
