@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waste_wise/activities/food_activity.dart';
 import 'package:waste_wise/activities/nearest_food_bin.dart';
 import 'package:waste_wise/activities/nearest_food_bin_on_map.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
@@ -13,6 +16,28 @@ class ModeratorHomeScreen extends StatefulWidget {
 }
 
 class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
+  Map<String, dynamic> _arguments = Get.arguments;
+  String _userName = '';
+  @override
+  void initState(){
+    super.initState();
+    _userName = _arguments['username'];
+    requestLocationPermission();
+  }
+
+  Future<void> requestLocationPermission() async {
+    var status = await Permission.location.status;
+
+    if (status.isDenied) {
+      if (await Permission.location.request().isGranted) {
+        print('Permission granted');
+      } else {
+        print("Location permission denied");
+      }
+    } else if (status.isGranted) {
+      print('Permission already granted');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,26 +52,29 @@ class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
             ),
           ),
           // Main Content
-          const SafeArea(
+           SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   Text(
-                    'HELLO, JOUHARA !',
-                    style: TextStyle(
+                    'HELLO, $_userName!',
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: CustomColors.mainButtonColor,
                     ),
                   ),
-                  SizedBox(height: 50),
-                  CustomButton(text: 'track food waste progress'),
-                  SizedBox(height: 50),
-                  CustomButton(text: 'search for nearest smart food bin'),
-                  SizedBox(height: 50),
-                  CustomButton(text: 'View educational content'),
+                  SizedBox(height: 30),
+                  CustomButton(text: 'track food waste progress',status: 1),
+                  SizedBox(height: 30),
+                  CustomButton(text: 'search for nearest smart food bin', status: 2),
+                  SizedBox(height: 30),
+                  CustomButton(text: 'View educational content', status: 3),
+                  SizedBox(height: 30),
+                  CustomButton(text: 'Check Food Bin On Map', status: 4),
+                  SizedBox(height: 10),
                 ],
               ),
             ),
@@ -59,14 +87,24 @@ class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
 
 class CustomButton extends StatelessWidget {
   final String text;
+  final int status;
 
-  const CustomButton({required this.text});
+  const CustomButton({required this.text,required this.status});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: (){
-        Get.to(() => NearestFoodBin());
+        if(status == 1){
+          Get.to(() => FoodActivity());
+        }else if(status == 2){
+          Get.to(() => NearestFoodBin());
+        }else if(status == 3){
+
+        }else if(status == 4){
+          Get.to(() => NearestFoodBinOnMap());
+        }
+
       },
       child: Container(
         padding: const EdgeInsets.all(40.0),

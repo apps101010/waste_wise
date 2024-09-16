@@ -72,7 +72,7 @@ class _SignupScreenState extends State<SignupScreen> {
                    TextField(
                     controller: email,
                     decoration: const InputDecoration(
-                      labelText: 'Email or Phone Number',
+                      labelText: 'Enter your Email',
                       labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: CustomColors.mainButtonColor),

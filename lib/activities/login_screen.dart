@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                    TextField(
                      controller: email,
                     decoration: const InputDecoration(
-                      labelText: 'Username, Email or Phone Number',
+                      labelText: 'Enter your email',
                       labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: CustomColors.mainButtonColor),
@@ -209,17 +209,17 @@ class _LoginScreenState extends State<LoginScreen> {
         print('Full Name: $fullName');
         print('Email: $email');
         print('Role: $role');
-        SharedPreferences.setMockInitialValues({});
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString("uid", userId);
-        prefs.setString("username", fullName);
-        prefs.setString("email", email);
-        prefs.setString("role", role);
+        // SharedPreferences.setMockInitialValues({});
+        // SharedPreferences prefs = await SharedPreferences.getInstance();
+        // prefs.setString("uid", userId);
+        // prefs.setString("username", fullName);
+        // prefs.setString("email", email);
+        // prefs.setString("role", role);
 
         Get.back();
         CustomSnackbar.showSnackbar('Success', "You are logged in successfully");
         if(role == "moderator"){
-          Get.off(() => const ModeratorHomeScreen());
+          Get.off(() => const ModeratorHomeScreen(), arguments: {'username':fullName});
         }else{
           Get.off(() => const AdminHomeScreen());
         }

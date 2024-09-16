@@ -17,6 +17,14 @@ class _PickLocationState extends State<PickLocation> {
   GoogleMapController? _mapController;
   LatLng? _pickedLocation;
 
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _pickedLocation = LatLng(argumentData['latitude'], argumentData['longitude']);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +36,13 @@ class _PickLocationState extends State<PickLocation> {
             Expanded(
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(double.parse(argumentData['latitude']), double.parse(argumentData['longitude'])), // Default location (Islamabad, Pakistan)
+                  target: LatLng(argumentData['latitude'], argumentData['longitude']), // Default location (Islamabad, Pakistan)
                   zoom: 14,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
                   setState(() {
-                    _pickedLocation = LatLng(double.parse(argumentData['latitude']), double.parse(argumentData['longitude']));
+                    _pickedLocation = LatLng(argumentData['latitude'], argumentData['longitude']);
                   });
                 },
                 onTap: (position) {

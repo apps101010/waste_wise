@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:waste_wise/activities/login_screen.dart';
 import 'package:waste_wise/util/custom_colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final List<Widget>? actions;
-  const CustomAppBar({super.key,required this.title,this.actions});
+  const CustomAppBar({super.key,required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      actions: actions,
+      actions: <Widget>[
+        PopupMenuButton<String>(
+          onSelected: (String value) {
+            if(value == 'Logout'){
+              Get.off(() => LoginScreen());
+            }
+          },
+          offset: const Offset(0, 40),
+          itemBuilder: (BuildContext context) {
+            return <String>['Logout'].map((String choice) {
+              return PopupMenuItem<String>(
+                value: choice,
+                child: Text(choice),
+              );
+            }).toList();
+          },
+        ),
+      ],
     );
   }
 
