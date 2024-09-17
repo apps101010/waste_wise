@@ -204,17 +204,19 @@ class _LoginScreenState extends State<LoginScreen> {
         String fullName = userData['fullName'];
         String email = userData['email'];
         String role = userData['role'];
+        String goalId = userData['goalid'];
 
         print('UID: $userId');
         print('Full Name: $fullName');
         print('Email: $email');
         print('Role: $role');
-        // SharedPreferences.setMockInitialValues({});
-        // SharedPreferences prefs = await SharedPreferences.getInstance();
-        // prefs.setString("uid", userId);
-        // prefs.setString("username", fullName);
-        // prefs.setString("email", email);
-        // prefs.setString("role", role);
+        SharedPreferences.setMockInitialValues({});
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("uid", userId);
+        prefs.setString("username", fullName);
+        prefs.setString("email", email);
+        prefs.setString("role", role);
+        prefs.setString('goalid', goalId);
 
         Get.back();
         CustomSnackbar.showSnackbar('Success', "You are logged in successfully");

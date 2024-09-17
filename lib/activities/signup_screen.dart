@@ -293,6 +293,7 @@ class _SignupScreenState extends State<SignupScreen> {
         await _firestore.collection('users').doc(uid).set({
           'fullName': fullName.text.toString(),
           'email': email.text.toString(),
+          'goalid': 'one',
           'role': 'moderator',
         });
 

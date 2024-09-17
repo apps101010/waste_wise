@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waste_wise/activities/show_map.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
 import 'package:waste_wise/util/custom_colors.dart';
@@ -340,6 +341,40 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
         await _firestore.collection('data').doc(binId).update({
           'remainingbincapacity': finalRemaining,
         });
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? goalId = prefs.getString('goalid');
+
+        // new code for goals
+        _firestore.collection('goals').doc(goalId).get().then((docSnapshot){
+
+          if(docSnapshot.exists){
+            var goalData = docSnapshot.data()!;
+            DateTime startDate = DateTime.parse(goalData['startDate']);
+            DateTime endDate = DateTime.parse(goalData['endDate']);
+            List<bool> foodAddedPerDay = List.from(goalData['foodAddedPerDay']);
+
+            int todayIndex = DateTime.now().difference(startDate).inDays;
+
+            if (todayIndex >= 0 && todayIndex < foodAddedPerDay.length) {
+              setState(() {
+                foodAddedPerDay[todayIndex] = true;
+              });
+
+              // Update the goal document in Firestore
+              _firestore.collection('goals').doc(goalId).update({
+                'foodAddedPerDay': foodAddedPerDay,
+              }).then((_) {
+                print('Food added and goal updated successfully');
+              }).catchError((error) {
+                print('Failed to update goal: $error');
+              });
+
+            }
+          }
+        });
+
+        // goals code end
 
         Get.back();
         Get.back();

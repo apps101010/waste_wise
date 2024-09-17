@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waste_wise/activities/add_goals.dart';
+import 'package:waste_wise/activities/all_goals.dart';
 import 'package:waste_wise/activities/food_activity.dart';
 import 'package:waste_wise/activities/nearest_food_bin.dart';
 import 'package:waste_wise/activities/nearest_food_bin_on_map.dart';
@@ -75,6 +77,8 @@ class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
                   CustomButton(text: 'View educational content', status: 3),
                   SizedBox(height: 30),
                   CustomButton(text: 'Check Food Bin On Map', status: 4),
+                  SizedBox(height: 30),
+                  CustomButton(text: 'Add Goals', status: 5),
                   SizedBox(height: 10),
                 ],
               ),
@@ -104,6 +108,8 @@ class CustomButton extends StatelessWidget {
           Get.to(() => ShowEducationalContent(),arguments: {'visibility':false});
         }else if(status == 4){
           Get.to(() => NearestFoodBinOnMap());
+        }else if(status == 5){
+          Get.to(() => AllGoals());
         }
 
       },
