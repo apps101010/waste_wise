@@ -7,7 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:waste_wise/activities/add_educational_content.dart';
 import 'package:waste_wise/activities/pick_location.dart';
+import 'package:waste_wise/activities/show_educational_content.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
 import 'package:waste_wise/util/custom_colors.dart';
 import 'package:waste_wise/util/custom_snackbar.dart';
@@ -45,159 +47,207 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       appBar: const CustomAppBar(
         title: 'Waste Wise',
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('data')
-            .where('userid', isEqualTo: currentuser?.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('data')
+                  .where('userid', isEqualTo: currentuser?.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-          final dataDocs = snapshot.data?.docs;
+                final dataDocs = snapshot.data?.docs;
 
-          if (dataDocs!.isEmpty) {
-            return const Center(
-              child: Text('No Food Bin Added Yet'),
-            );
-          }
+                if (dataDocs!.isEmpty) {
+                  return const Center(
+                    child: Text('No Food Bin Added Yet'),
+                  );
+                }
 
-          return ListView.builder(
-            itemCount: dataDocs.length ?? 0,
-            itemBuilder: (context, index) {
-              var doc = dataDocs[index];
-              return Container(
-                margin: const EdgeInsets.all(5.0),
-                padding: const EdgeInsets.all(5.0),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      CustomColors.mainButtonColor,
-                      CustomColors.mainColorLowShade
-                    ], // Gradient background
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      spreadRadius: 2,
-                      blurRadius: 6,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      contentPadding: const EdgeInsets.all(8.0),
-                      title: Text(
-                        doc['binname'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                          color: Colors.white,
+                return ListView.builder(
+                  itemCount: dataDocs.length ?? 0,
+                  itemBuilder: (context, index) {
+                    var doc = dataDocs[index];
+                    return Container(
+                      margin: const EdgeInsets.all(5.0),
+                      padding: const EdgeInsets.all(5.0),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            CustomColors.mainButtonColor,
+                            CustomColors.mainColorLowShade
+                          ], // Gradient background
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(20.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      subtitle: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.storage,
-                              color: Colors.white70, size: 18),
-                          const SizedBox(width: 5),
-                          Expanded(
-                            child: Text(
-                              'Capacity: ${doc['binquantity']} \nRemaining: ${doc['remainingbincapacity']}',
+                          ListTile(
+                            contentPadding: const EdgeInsets.all(8.0),
+                            title: Text(
+                              doc['binname'],
                               style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
                                 color: Colors.white,
-                                fontSize: 15,
                               ),
+                            ),
+                            subtitle: Row(
+                              children: [
+                                const Icon(Icons.storage,
+                                    color: Colors.white70, size: 18),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    'Capacity: ${doc['binquantity']} \nRemaining: ${doc['remainingbincapacity']}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              Get.to(() => const PickLocation(), arguments: {
+                                'latitude': double.parse(doc['latitude']),
+                                'longitude': double.parse(doc['longitude']),
+                                'status': false
+                              });
+                            },
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.white),
+                                  onPressed: () {
+                                    updateBinDetailsDialog(
+                                      doc['binname'],
+                                      doc['binquantity'],
+                                      doc['latitude'],
+                                      doc['longitude'],
+                                      doc['uniqueid'],
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red[900]),
+                                  onPressed: () => _deleteData(doc['uniqueid']),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.all(5.0),
+                                backgroundColor: Colors.white,
+                                foregroundColor: CustomColors.mainButtonColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                              ),
+                              icon: const Icon(Icons.hourglass_empty,
+                                  color: CustomColors.mainButtonColor,size: 17.0,),
+                              label: const Text(
+                                'Make It Empty',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              onPressed: () {
+                                _updateRemainingCapacity(doc['uniqueid'],int.parse(doc['binquantity']));
+                              },
                             ),
                           ),
                         ],
                       ),
-                      onTap: () {
-                        Get.to(() => const PickLocation(), arguments: {
-                          'latitude': double.parse(doc['latitude']),
-                          'longitude': double.parse(doc['longitude']),
-                          'status': false
-                        });
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 5.0,right: 5.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                      onPressed: (){
+                        Get.to(() => const ShowEducationalContent(),arguments: {'visibility':true});
                       },
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white),
-                            onPressed: () {
-                              updateBinDetailsDialog(
-                                doc['binname'],
-                                doc['binquantity'],
-                                doc['latitude'],
-                                doc['longitude'],
-                                doc['uniqueid'],
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red[900]),
-                            onPressed: () => _deleteData(doc['uniqueid']),
-                          ),
-                        ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: CustomColors.mainButtonColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        )
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(5.0),
-                          backgroundColor: Colors.white,
-                          foregroundColor: CustomColors.mainButtonColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                        icon: const Icon(Icons.hourglass_empty,
-                            color: CustomColors.mainButtonColor,size: 17.0,),
-                        label: const Text(
-                          'Make It Empty',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        onPressed: () {
-                          _updateRemainingCapacity(doc['uniqueid'],int.parse(doc['binquantity']));
-                        },
-                      ),
-                    ),
-                  ],
+                      child: const Text('Add Content'),),
                 ),
-              );
-            },
-          );
-        },
+
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 5.0),
+                      child: ElevatedButton(
+                        onPressed: (){
+                          binNameController.text = '';
+                          binQuantityControler.text= '';
+                          binLocationController.text = '';
+                          showCustomDialog();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CustomColors.mainButtonColor,
+                          foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            )
+                        ),
+                        child: Text('Add Bin'),),
+                    ),
+                  ),
+              ],
+            ),
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: CustomColors.mainButtonColor,
-        elevation: 6.0,
-        onPressed: () {
-          binNameController.text = '';
-          binQuantityControler.text= '';
-          binLocationController.text = '';
-          showCustomDialog();
-        },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: CustomColors.mainButtonColor,
+      //   elevation: 6.0,
+      //   onPressed: () {
+      //     binNameController.text = '';
+      //     binQuantityControler.text= '';
+      //     binLocationController.text = '';
+      //     showCustomDialog();
+      //   },
+      //   child: const Icon(
+      //     Icons.add,
+      //     color: Colors.white,
+      //   ),
+      // ),
     );
   }
 

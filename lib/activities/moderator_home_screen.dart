@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waste_wise/activities/food_activity.dart';
 import 'package:waste_wise/activities/nearest_food_bin.dart';
 import 'package:waste_wise/activities/nearest_food_bin_on_map.dart';
+import 'package:waste_wise/activities/show_educational_content.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
 import 'package:waste_wise/util/custom_colors.dart';
 
@@ -100,7 +101,7 @@ class CustomButton extends StatelessWidget {
         }else if(status == 2){
           Get.to(() => NearestFoodBin());
         }else if(status == 3){
-
+          Get.to(() => ShowEducationalContent(),arguments: {'visibility':false});
         }else if(status == 4){
           Get.to(() => NearestFoodBinOnMap());
         }

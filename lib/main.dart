@@ -9,10 +9,11 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: FirebaseOptions(
-      apiKey: 'AIzaSyDwdDeSurZMv_swhjnJPve8eBhWGcNpCAc', // paste your api key here
-      appId: '1:992542002602:android:cac7dee06f721604b5afd3', //paste your app id here
-      messagingSenderId: '992542002602', //paste your messagingSenderId here
-      projectId: 'waste-wise-db410', //paste your project id here
+      apiKey: 'AIzaSyDwdDeSurZMv_swhjnJPve8eBhWGcNpCAc',
+      appId: '1:992542002602:android:cac7dee06f721604b5afd3',
+      messagingSenderId: '992542002602',
+      projectId: 'waste-wise-db410',
+      storageBucket: "gs://waste-wise-db410.appspot.com",
     ),
   );
   runApp(const MyApp());
