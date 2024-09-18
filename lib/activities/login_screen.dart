@@ -196,38 +196,49 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       UserCredential userCredential =  await _auth.signInWithEmailAndPassword(email: email.text.toString(), password: password.text.toString());
       String userId =  userCredential.user!.uid;
-      DocumentSnapshot userDoc =
-      await _firestore.collection('users').doc(userId).get();
-      if (userDoc.exists) {
+      User? user = userCredential.user;
 
-        var userData = userDoc.data() as Map<String, dynamic>;
-        String fullName = userData['fullName'];
-        String email = userData['email'];
-        String role = userData['role'];
-        String goalId = userData['goalid'];
+      if(user!.emailVerified){
 
-        print('UID: $userId');
-        print('Full Name: $fullName');
-        print('Email: $email');
-        print('Role: $role');
-        SharedPreferences.setMockInitialValues({});
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString("uid", userId);
-        prefs.setString("username", fullName);
-        prefs.setString("email", email);
-        prefs.setString("role", role);
-        prefs.setString('goalid', goalId);
+        DocumentSnapshot userDoc =
+        await _firestore.collection('users').doc(userId).get();
+        if (userDoc.exists) {
 
-        Get.back();
-        CustomSnackbar.showSnackbar('Success', "You are logged in successfully");
-        if(role == "moderator"){
-          Get.off(() => const ModeratorHomeScreen(), arguments: {'username':fullName});
-        }else{
-          Get.off(() => const AdminHomeScreen());
+          var userData = userDoc.data() as Map<String, dynamic>;
+          String fullName = userData['fullName'];
+          String email = userData['email'];
+          String role = userData['role'];
+          String goalId = userData['goalid'];
+          String currentTrack = userData['currenttrack'];
+
+          print('UID: $userId');
+          print('Full Name: $fullName');
+          print('Email: $email');
+          print('Role: $role');
+          SharedPreferences.setMockInitialValues({});
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString("uid", userId);
+          prefs.setString("username", fullName);
+          prefs.setString("email", email);
+          prefs.setString("role", role);
+          prefs.setString('goalid', goalId);
+          prefs.setString('currenttrack', currentTrack);
+
+          Get.back();
+          CustomSnackbar.showSnackbar('Success', "You are logged in successfully");
+          if(role == "moderator"){
+            Get.off(() => const ModeratorHomeScreen(), arguments: {'username':fullName});
+          }else{
+            Get.off(() => const AdminHomeScreen());
+          }
+          print('sigin success');
+        } else {
+          print('User data not found in Firestore');
         }
-        print('sigin success');
-      } else {
-        print('User data not found in Firestore');
+
+      }else{
+        Get.back();
+        CustomSnackbar.showSnackbar('OOPS!', 'Kindly check your email to verify your account before proceeding');
       }
 
     } catch (e) {

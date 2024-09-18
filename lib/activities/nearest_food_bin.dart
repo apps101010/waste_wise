@@ -57,7 +57,7 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
           }
 
           if(dataDocs.isEmpty){
-            return Center(child: Text('No Data Available'),);
+            return const Center(child: Text('No Data Available'),);
           }
 
           // Calculate distances and sort bins
@@ -320,6 +320,7 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
 
   void _saveDataToFirestore(String binId, int remainingCapacity) async{
     int finalRemaining = remainingCapacity - int.parse(_foodQuantityController.text);
+    String foodQuantity = _foodQuantityController.text.toString().trim();
     CustomProgressDialog.showProgressDialog("Please Wait", "Inserting your data");
     DateTime dateTime = DateTime.now();
     try{
@@ -333,7 +334,7 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
         await _firestore.collection('moderator').doc(docId).set({
           'userid': uid,
           'foodname': _foodNameController.text.toString().trim(),
-          'foodquantity': _foodQuantityController.text.toString(),
+          'foodquantity': _foodQuantityController.text.toString().trim(),
           'date': formatDateTime(dateTime),
           'binid': binId,
           'uniqueid': docId,
@@ -344,6 +345,7 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String? goalId = prefs.getString('goalid');
+        print(goalId);
 
         // new code for goals
         _firestore.collection('goals').doc(goalId).get().then((docSnapshot){
@@ -352,10 +354,13 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
             var goalData = docSnapshot.data()!;
             DateTime startDate = DateTime.parse(goalData['startDate']);
             DateTime endDate = DateTime.parse(goalData['endDate']);
+            int target = goalData['target'];
+            int remaining = goalData['remaining'];
             List<bool> foodAddedPerDay = List.from(goalData['foodAddedPerDay']);
-
+            print(remaining);
             int todayIndex = DateTime.now().difference(startDate).inDays;
-
+            int finalRemaining = remaining - int.parse(foodQuantity);
+            print(finalRemaining);
             if (todayIndex >= 0 && todayIndex < foodAddedPerDay.length) {
               setState(() {
                 foodAddedPerDay[todayIndex] = true;
@@ -364,6 +369,7 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
               // Update the goal document in Firestore
               _firestore.collection('goals').doc(goalId).update({
                 'foodAddedPerDay': foodAddedPerDay,
+                'remaining': finalRemaining,
               }).then((_) {
                 print('Food added and goal updated successfully');
               }).catchError((error) {
@@ -371,8 +377,17 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
               });
 
             }
+
+
           }
         });
+        DateTime now = DateTime.now();
+        String currentDate = "${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}";
+
+        await _firestore.collection('users').doc(prefs.getString('uid')).update({
+          'currenttrack': currentDate,
+        });
+        prefs.setString('currenttrack', currentDate);
 
         // goals code end
 

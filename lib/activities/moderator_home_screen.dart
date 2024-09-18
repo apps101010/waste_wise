@@ -21,11 +21,17 @@ class ModeratorHomeScreen extends StatefulWidget {
 class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
   Map<String, dynamic> _arguments = Get.arguments;
   String _userName = '';
+  String? currentDate;
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _userName = _arguments['username'];
     requestLocationPermission();
+    DateTime now = DateTime.now();
+    currentDate = "${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}";
+
+    checkEntry(currentDate!);
+
   }
 
   Future<void> requestLocationPermission() async {
@@ -88,6 +94,100 @@ class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
       ),
     );
   }
+
+  void checkEntry(String cDate) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.getString('currenttrack') == 'current'){
+      showReminderDialog();
+    }else{
+      String? sDate = prefs.getString('currenttrack');
+      DateTime currentDate = DateTime.parse(formatDateForComparison(cDate));
+      DateTime saveDate = DateTime.parse(formatDateForComparison(sDate!));
+
+      if(saveDate.isBefore(currentDate)){
+        showReminderDialog();
+      }else{
+        print('all ok');
+      }
+    }
+
+  }
+
+
+  void showReminderDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: Container(
+
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Close Icon
+                Align(
+                  alignment: Alignment.topRight,
+                  child: InkWell(
+                    onTap: () {
+                      Get.back(); // Close the dialog
+                    },
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Message
+                const Text(
+                  "Please log today’s food to meet your goal.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: CustomColors.mainButtonColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Button
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                      Get.to(() => const NearestFoodBin());
+
+
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CustomColors.mainButtonColor,
+                      foregroundColor: Colors.white
+                    ),
+                    child: const Text('Enter Food Now',),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  String formatDateForComparison(String date) {
+    List<String> parts = date.split('-');
+    return '${parts[2]}-${parts[1]}-${parts[0]}'; // Converts from 'dd-MM-yyyy' to 'yyyy-MM-dd'
+  }
 }
 
 class CustomButton extends StatelessWidget {
@@ -135,4 +235,6 @@ class CustomButton extends StatelessWidget {
       ),
     );
   }
+
+
 }

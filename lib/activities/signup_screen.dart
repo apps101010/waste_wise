@@ -279,43 +279,46 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void signUpUser() async {
     CustomProgressDialog.showProgressDialog("Please Wait", "We are checking your details");
-      try {
-        // Create user with Firebase Authentication
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-          email: email.text.toString(),
-          password: password.text.toString(),
-        );
+    try {
 
-        // Get the created user's UID
-        String uid = userCredential.user!.uid;
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email.text.toString(),
+        password: password.text.toString(),
+      );
 
-        // Store additional data in Firestore
-        await _firestore.collection('users').doc(uid).set({
-          'fullName': fullName.text.toString(),
-          'email': email.text.toString(),
-          'goalid': 'one',
-          'role': 'moderator',
-        });
+      String uid = userCredential.user!.uid;
 
-        Get.back();
-        Get.back();
-        CustomSnackbar.showSnackbar("Success", "You have registered Successfully");
-        print('Signup success');
-      } catch (e) {
-        Get.back();
-        if (e is FirebaseAuthException) {
-          if(e.code == "email-already-in-use"){
-            CustomSnackbar.showSnackbar("Account Exist", "The email address is already in use by another account");
-          }
-          print('Error code: ${e.code}');
-          print('Error message: ${e.message}');
-          print('Error stackTrace: ${e.stackTrace}');
-        } else {
-          CustomSnackbar.showSnackbar('OOPS!!', "Firebase Internal Error");
-          print('General error: ${e.toString()}');
+      await userCredential.user!.sendEmailVerification();
+
+      await _firestore.collection('users').doc(uid).set({
+        'fullName': fullName.text.toString(),
+        'email': email.text.toString(),
+        'goalid': 'one',
+        'currenttrack':'current',
+        'role': 'moderator',
+      });
+
+      Get.back();
+      Get.back();
+      CustomSnackbar.showSnackbar(
+          "Success", "You have registered successfully. Please check your email to verify your account.");
+      print('Signup success, verification email sent');
+    } catch (e) {
+      Get.back();
+      if (e is FirebaseAuthException) {
+        if (e.code == "email-already-in-use") {
+          CustomSnackbar.showSnackbar("Account Exist", "The email address is already in use by another account");
         }
-        print({e.toString()});
-        // Handle errors (e.g., show a dialog with the error message)
+        print('Error code: ${e.code}');
+        print('Error message: ${e.message}');
+        print('Error stackTrace: ${e.stackTrace}');
+      } else {
+        CustomSnackbar.showSnackbar('OOPS!!', "Firebase Internal Error");
+        print('General error: ${e.toString()}');
       }
+      print({e.toString()});
+
+    }
   }
+
 }
