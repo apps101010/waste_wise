@@ -8,6 +8,7 @@ import 'package:waste_wise/activities/food_activity.dart';
 import 'package:waste_wise/activities/nearest_food_bin.dart';
 import 'package:waste_wise/activities/nearest_food_bin_on_map.dart';
 import 'package:waste_wise/activities/show_educational_content.dart';
+import 'package:waste_wise/activities/track_food_waste.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
 import 'package:waste_wise/util/custom_colors.dart';
 
@@ -76,15 +77,15 @@ class _ModeratorHomeScreenState extends State<ModeratorHomeScreen> {
                     ),
                   ),
                   SizedBox(height: 30),
-                  CustomButton(text: 'track food waste progress',status: 1),
-                  SizedBox(height: 30),
                   CustomButton(text: 'search for nearest smart food bin', status: 2),
                   SizedBox(height: 30),
+                  CustomButton(text: 'track food waste progress',status: 1),
+                  SizedBox(height: 30),
                   CustomButton(text: 'Educational Resources', status: 3),
-                  SizedBox(height: 30),
-                  CustomButton(text: 'Check Food Bin On Map', status: 4),
-                  SizedBox(height: 30),
-                  CustomButton(text: 'My Plan', status: 5),
+                  // SizedBox(height: 30),
+                  // CustomButton(text: 'Check Food Bin On Map', status: 4),
+                  // SizedBox(height: 30),
+                  // CustomButton(text: 'My Plan', status: 5),
                   SizedBox(height: 10),
                 ],
               ),
@@ -201,7 +202,7 @@ class CustomButton extends StatelessWidget {
     return InkWell(
       onTap: (){
         if(status == 1){
-          Get.to(() => FoodActivity());
+          Get.to(() => TrackFoodWaste());
         }else if(status == 2){
           Get.to(() => NearestFoodBin());
         }else if(status == 3){
