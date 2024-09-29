@@ -48,7 +48,7 @@ class _FoodActivityState extends State<FoodActivity> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search by food name...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
@@ -81,7 +81,7 @@ class _FoodActivityState extends State<FoodActivity> {
                 }).toList();
 
                 if (filteredDocs == null || filteredDocs.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Text('No Food Added By You'),
                   );
                 }
@@ -134,7 +134,7 @@ class _FoodActivityState extends State<FoodActivity> {
                                       children: [
                                         Text(
                                           doc['foodname'],
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.black87,
