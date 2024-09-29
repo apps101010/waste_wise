@@ -132,7 +132,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       )),
                       const SizedBox(height: 3),
                       const Text(
-                        'Must contain a number and least of six characters',
+                        'Must contain a number, special character and least of 8 characters',
                         style: TextStyle(
                           fontSize: 12,
                           color: CustomColors.mainButtonColor,
@@ -175,7 +175,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       )),
                       const SizedBox(height: 3),
                       const Text(
-                        'Must contain a number and least of six characters',
+                        'Must contain a number, special character and least of 8 characters',
                         style: TextStyle(
                             fontSize: 12,
                             color: CustomColors.mainButtonColor,
@@ -263,7 +263,7 @@ class _SignupScreenState extends State<SignupScreen> {
       CustomSnackbar.showSnackbar("Confirm Password", "Please enter your password again");
       return false;
     }else if(!_isPasswordValid()){
-      CustomSnackbar.showSnackbar("OOPS!", "password should be 6 characters long and must contain at least one number");
+      CustomSnackbar.showSnackbar("OOPS!", "password should be 8 characters long and must contain at least one number and a special character");
       return false;
   } else if(password.text.toString() != confirmPassword.text.toString()){
       CustomSnackbar.showSnackbar("OOPS!", "Your password does not match");
@@ -273,8 +273,13 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  // bool _isPasswordValid() {
+  //   return RegExp(r'^(?=.*[0-9])[a-zA-Z0-9]{6,}$').hasMatch(password.text.toString());
+  // }
+
   bool _isPasswordValid() {
-    return RegExp(r'^(?=.*[0-9])[a-zA-Z0-9]{6,}$').hasMatch(password.text.toString());
+    return RegExp(r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z0-9!@#$%^&*(),.?":{}|<>]{8,}$')
+        .hasMatch(password.text.toString());
   }
 
   void signUpUser() async {
