@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,7 @@ class AllGoals extends StatefulWidget {
 }
 
 class _AllGoalsState extends State<AllGoals> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   TextEditingController goalNameController = TextEditingController();
@@ -30,13 +32,17 @@ class _AllGoalsState extends State<AllGoals> {
 
   @override
   Widget build(BuildContext context) {
+    User? currentuser = _auth.currentUser;
     return Scaffold(
       appBar: CustomAppBar(title: 'Waste Wise',),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: firestore.collection('goals').snapshots(),
+              stream: firestore.collection('goals')
+                  .where('userid', isEqualTo: currentuser?.uid)
+                  .orderBy('startDate', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -376,7 +382,7 @@ class _AllGoalsState extends State<AllGoals> {
   void saveGoal() async{
     CustomProgressDialog.showProgressDialog('Please Wait', 'We are adding your Goal');
     try{
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       String goalName = goalNameController.text;
       if (goalName.isNotEmpty && startDate != null && endDate != null) {
         DocumentReference docRef =  await firestore.collection('goals').add({
@@ -386,10 +392,11 @@ class _AllGoalsState extends State<AllGoals> {
           'startDate': startDate!.toIso8601String(),
           'endDate': endDate!.toIso8601String(),
           'foodAddedPerDay': foodAddedPerDay,
+          'userid': prefs.getString('uid'),
         });
 
         String newGoalId = docRef.id;
-        SharedPreferences prefs = await SharedPreferences.getInstance();
+
         print(prefs.getString('uid'));
         print(newGoalId);
 
