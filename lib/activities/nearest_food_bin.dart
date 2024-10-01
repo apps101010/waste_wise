@@ -26,6 +26,8 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
 
   var _foodNameController = TextEditingController();
   var _foodQuantityController = TextEditingController();
+  var _searchController = TextEditingController();
+  String _searchTerm = '';
 
   @override
   void initState() {
@@ -39,186 +41,213 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Waste Wise'),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('data').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchTerm = value.toLowerCase();
+                });
+              },
+              decoration: const InputDecoration(
+                labelText: 'Search Bin by Name',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('data').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          final dataDocs = snapshot.data?.docs;
+                final dataDocs = snapshot.data?.docs;
 
-          if (_currentPosition == null || dataDocs == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+                if (_currentPosition == null || dataDocs == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          if(dataDocs.isEmpty){
-            return const Center(child: Text('No Data Available'),);
-          }
+                if (dataDocs.isEmpty) {
+                  return const Center(child: Text('No Data Available'));
+                }
 
-          // Calculate distances and sort bins
-          List<Map<String, dynamic>> binsWithDistances = dataDocs.map((doc) {
-            double? latitude = double.parse(doc['latitude']);
-            double? longitude = double.parse(doc['longitude']);
+                // Filter bins by search term
+                final filteredDocs = dataDocs.where((doc) {
+                  String binName = doc['binname'].toString().toLowerCase();
+                  return binName.contains(_searchTerm);
+                }).toList();
 
-            double distanceInKm = 0.0;
-            if (latitude != null && longitude != null) {
-              distanceInKm = Geolocator.distanceBetween(
-                _currentPosition!.latitude,
-                _currentPosition!.longitude,
-                latitude,
-                longitude,
-              ) / 1000; // Convert meters to kilometers
-            }
+                // Calculate distances and sort bins
+                List<Map<String, dynamic>> binsWithDistances = filteredDocs.map((doc) {
+                  double latitude = double.parse(doc['latitude']);
+                  double longitude = double.parse(doc['longitude']);
 
-            return {
-              'doc': doc,
-              'distance': distanceInKm,
-            };
-          }).toList();
+                  double distanceInKm = Geolocator.distanceBetween(
+                    _currentPosition!.latitude,
+                    _currentPosition!.longitude,
+                    latitude,
+                    longitude,
+                  ) / 1000; // Convert meters to kilometers
 
-          binsWithDistances.sort((a, b) => a['distance'].compareTo(b['distance']));
+                  return {
+                    'doc': doc,
+                    'distance': distanceInKm,
+                  };
+                }).toList();
 
-          return ListView.builder(
-            itemCount: binsWithDistances.length,
-            itemBuilder: (context, index) {
-              var item = binsWithDistances[index];
-              var doc = item['doc'];
-              double distanceInKm = item['distance'];
+                binsWithDistances.sort((a, b) => a['distance'].compareTo(b['distance']));
 
-              return InkWell(
-                onTap: (){
-                  if(doc['remainingbincapacity'] != 0){
-                    showCustomDialog(doc['uniqueid'],doc['remainingbincapacity']);
-                  }else{
-                    CustomSnackbar.showSnackbar('OOPS!', 'The Bin is currently full. You can not add more food into it');
-                  }
+                return ListView.builder(
+                  itemCount: binsWithDistances.length,
+                  itemBuilder: (context, index) {
+                    var item = binsWithDistances[index];
+                    var doc = item['doc'];
+                    double distanceInKm = item['distance'];
 
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [CustomColors.mainButtonColor, CustomColors.mainColorLowShade], // Green gradient
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        spreadRadius: 2,
-                        blurRadius: 8,
-                        offset: Offset(0, 5), // Shadow position
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    return InkWell(
+                      onTap: () {
+                        if (doc['remainingbincapacity'] != 0) {
+                          showCustomDialog(doc['uniqueid'], doc['remainingbincapacity']);
+                        } else {
+                          CustomSnackbar.showSnackbar('OOPS!', 'The Bin is currently full. You cannot add more food into it');
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [CustomColors.mainButtonColor, CustomColors.mainColorLowShade], // Green gradient
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: Offset(0, 5), // Shadow position
+                            ),
+                          ],
+                        ),
+                        child: Stack(
                           children: [
-                            // Bin Name
-                            Text(
-                              doc['binname'],
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Bin Name
+                                  Text(
+                                    doc['binname'],
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  // Capacity Row with Icon
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.storage, color: Colors.white70, size: 18),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Capacity: ${doc['binquantity']} kg | Remaining: ${doc['remainingbincapacity']} kg',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16), // Spacing before button
+
+                                  // Button Positioned at the Bottom
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Get.to(() => ShowOnMap(), arguments: {
+                                          'currentlatitude': _currentPosition?.latitude,
+                                          'currentlongitude': _currentPosition?.longitude,
+                                          'endlatitude': doc['latitude'],
+                                          'endlongitude': doc['longitude'],
+                                          'binname': doc['binname'],
+                                          'distance': distanceInKm,
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        backgroundColor: Colors.white, // White button for contrast
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12), // Rounded button corners
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Check On Map',
+                                        style: TextStyle(
+                                          color: Color(0xFF43a047), // Matching button text color
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 10),
 
-                            // Capacity Row with Icon
-                            Row(
-                              children: [
-                                const Icon(Icons.storage, color: Colors.white70, size: 18),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Capacity: ${doc['binquantity']} kg | Remaining: ${doc['remainingbincapacity']} kg',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white70,
-                                  ),
+                            // Distance at Top Right Corner
+                            Positioned(
+                              top: 16,
+                              right: 16,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white70,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 16), // Spacing before button
-
-                            // Button Positioned at the Bottom
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Get.to(() => ShowOnMap(), arguments: {'currentlatitude': _currentPosition?.latitude,'currentlongitude': _currentPosition?.longitude,
-                                    'endlatitude':doc['latitude'],'endlongitude': doc['longitude'], 'binname':doc['binname'],'distance':distanceInKm});
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  backgroundColor: Colors.white, // White button for contrast
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12), // Rounded button corners
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Check On Map',
-                                  style: TextStyle(
-                                    color: Color(0xFF43a047), // Matching button text color
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on,
+                                      color: CustomColors.mainButtonColor,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${distanceInKm.toStringAsFixed(2)} km',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: CustomColors.mainButtonColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-
-                      // Distance at Top Right Corner
-                      Positioned(
-                        top: 16,
-                        right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on,
-                                color: CustomColors.mainButtonColor,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${distanceInKm.toStringAsFixed(2)} km',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: CustomColors.mainButtonColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-
-
-        },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

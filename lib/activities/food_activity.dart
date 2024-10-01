@@ -140,14 +140,16 @@ class _FoodActivityState extends State<FoodActivity> {
                                             color: Colors.black87,
                                           ),
                                         ),
-                                        Text(
-                                          'Date: ${doc['date']}',
-                                          style: TextStyle(
-                                            fontSize: 14.0,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
+
                                       ],
+                                    ),
+
+                                    Text(
+                                      'Date: ${doc['date']}',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.grey[600],
+                                      ),
                                     ),
                                     SizedBox(height: 8.0),
                                     Text(
