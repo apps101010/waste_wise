@@ -32,18 +32,18 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/bg.png"),
-              fit: BoxFit.cover,
-            ),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/bg.png"),
+            fit: BoxFit.cover,
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25),
+            child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -69,11 +69,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 30),
 
                   // Email text field section
-                   TextField(
+                  TextField(
                     controller: email,
                     decoration: const InputDecoration(
                       labelText: 'Enter your Email',
-                      labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
+                      labelStyle: TextStyle(
+                        color: CustomColors.mainButtonColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                      ),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: CustomColors.mainButtonColor),
                       ),
@@ -85,11 +89,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 5),
 
                   // Full name section
-                   TextField(
-                     controller: fullName,
+                  TextField(
+                    controller: fullName,
                     decoration: const InputDecoration(
                       labelText: 'Full Name',
-                      labelStyle: TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
+                      labelStyle: TextStyle(
+                        color: CustomColors.mainButtonColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                      ),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: CustomColors.mainButtonColor),
                       ),
@@ -101,7 +109,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 5),
 
                   // password text field section
-                   Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Obx(() => TextField(
@@ -109,7 +117,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         obscureText: _isPassowrdVisible.value,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          labelStyle: const TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
+                          labelStyle: const TextStyle(
+                              color: CustomColors.mainButtonColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.0),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _isPassowrdVisible.value
@@ -118,58 +129,17 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: Colors.green,
                             ),
                             onPressed: () {
-                              _isPassowrdVisible.value = !_isPassowrdVisible.value;
-
+                              _isPassowrdVisible.value =
+                              !_isPassowrdVisible.value;
                             },
                           ),
                           enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: CustomColors.mainButtonColor),
+                            borderSide: BorderSide(
+                                color: CustomColors.mainButtonColor),
                           ),
                           focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: CustomColors.mainButtonColor),
-                          ),
-                        ),
-                      )),
-                      const SizedBox(height: 3),
-                      const Text(
-                        'Must contain a number, special character and least of 8 characters',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: CustomColors.mainButtonColor,
-                          fontWeight: FontWeight.w500
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-
-                  // confirm password text field section
-                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(() => TextField(
-                        controller: confirmPassword,
-                        obscureText: _isConfirmPasswordVisible.value,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          labelStyle: const TextStyle(color: CustomColors.mainButtonColor,fontWeight: FontWeight.bold,fontSize: 14.0),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isConfirmPasswordVisible.value
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Colors.green,
-                            ),
-                            onPressed: () {
-                              _isConfirmPasswordVisible.value = !_isConfirmPasswordVisible.value;
-
-                            },
-                          ),
-                          enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: CustomColors.mainButtonColor),
-                          ),
-                          focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: CustomColors.mainButtonColor),
+                            borderSide: BorderSide(
+                                color: CustomColors.mainButtonColor),
                           ),
                         ),
                       )),
@@ -179,8 +149,54 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(
                             fontSize: 12,
                             color: CustomColors.mainButtonColor,
-                            fontWeight: FontWeight.w500
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+
+                  // confirm password text field section
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Obx(() => TextField(
+                        controller: confirmPassword,
+                        obscureText: _isConfirmPasswordVisible.value,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          labelStyle: const TextStyle(
+                              color: CustomColors.mainButtonColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.0),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isConfirmPasswordVisible.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.green,
+                            ),
+                            onPressed: () {
+                              _isConfirmPasswordVisible.value =
+                              !_isConfirmPasswordVisible.value;
+                            },
+                          ),
+                          enabledBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: CustomColors.mainButtonColor),
+                          ),
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: CustomColors.mainButtonColor),
+                          ),
                         ),
+                      )),
+                      const SizedBox(height: 3),
+                      const Text(
+                        'Must contain a number, special character and least of 8 characters',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: CustomColors.mainButtonColor,
+                            fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -191,26 +207,29 @@ class _SignupScreenState extends State<SignupScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        if(_validateFields()){
+                        if (_validateFields()) {
                           signUpUser();
                         }
-
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: CustomColors.mainButtonColor,
                         shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                            borderRadius: BorderRadius.zero),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 12),
                       ),
                       child: const Text(
                         'Sign Up',
-                        style: TextStyle(fontSize: 18, color: Colors.white,fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Spacer(),
+
+                  // Login Section
                   Container(
                     margin: const EdgeInsets.only(bottom: 5.0),
                     child: Row(
@@ -226,7 +245,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         GestureDetector(
                           onTap: () {
                             Get.to(() => const LoginScreen());
-
                           },
                           child: const Text(
                             'Login',
@@ -247,6 +265,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+
   }
 
   bool _validateFields() {

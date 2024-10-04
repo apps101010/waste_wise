@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:waste_wise/util/custom_app_bar.dart';
 
 class ShowEducationalContentDetail extends StatelessWidget {
@@ -77,17 +79,36 @@ class ShowEducationalContentDetail extends StatelessWidget {
               ),
 
               // Description
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //   child: Center(
+              //     child: Text(
+              //       arguments['description'],
+              //       textAlign: TextAlign.center,
+              //       style: const TextStyle(
+              //         fontSize: 15,
+              //         height: 1.5,
+              //         color: Colors.black54,
+              //       ),
+              //     ),
+              //   ),
+              // ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Center(
-                  child: Text(
-                    arguments['description'],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      height: 1.5,
-                      color: Colors.black54,
-                    ),
+                  child: Linkify(
+                    onOpen: (link) async {
+                      Uri uri = Uri.parse(link.url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        throw 'Could not launch $link';
+                      }
+                    },
+                    text: arguments['description'],
+                    style: const TextStyle(color: Colors.black54, fontSize: 15, height: 1.5, ),
+                    linkStyle: const TextStyle(color: Colors.blue),
                   ),
                 ),
               ),

@@ -116,11 +116,11 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
 
                     return InkWell(
                       onTap: () {
-                        if (doc['remainingbincapacity'] != 0) {
-                          showCustomDialog(doc['uniqueid'], doc['remainingbincapacity']);
-                        } else {
-                          CustomSnackbar.showSnackbar('OOPS!', 'The Bin is currently full. You cannot add more food into it');
-                        }
+                        // if (doc['remainingbincapacity'] != 0) {
+                        //   showCustomDialog(doc['uniqueid'], doc['remainingbincapacity']);
+                        // } else {
+                        //   CustomSnackbar.showSnackbar('OOPS!', 'The Bin is currently full. You cannot add more food into it');
+                        // }
                       },
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -175,35 +175,64 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
                                   const SizedBox(height: 16), // Spacing before button
 
                                   // Button Positioned at the Bottom
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Get.to(() => ShowOnMap(), arguments: {
-                                          'currentlatitude': _currentPosition?.latitude,
-                                          'currentlongitude': _currentPosition?.longitude,
-                                          'endlatitude': doc['latitude'],
-                                          'endlongitude': doc['longitude'],
-                                          'binname': doc['binname'],
-                                          'distance': distanceInKm,
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                        backgroundColor: Colors.white, // White button for contrast
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12), // Rounded button corners
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Add Food Button
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          if (doc['remainingbincapacity'] != 0) {
+                                            showCustomDialog(doc['uniqueid'], doc['remainingbincapacity']);
+                                          } else {
+                                            CustomSnackbar.showSnackbar('OOPS!', 'The Bin is currently full. You cannot add more food into it');
+                                          }
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                          backgroundColor: Colors.white, // White button for contrast
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12), // Rounded button corners
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Add Food',
+                                          style: TextStyle(
+                                            color: Color(0xFF43a047), // Matching button text color
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                      child: const Text(
-                                        'Check On Map',
-                                        style: TextStyle(
-                                          color: Color(0xFF43a047), // Matching button text color
-                                          fontWeight: FontWeight.bold,
+
+                                      // check on map button
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Get.to(() => ShowOnMap(), arguments: {
+                                            'currentlatitude': _currentPosition?.latitude,
+                                            'currentlongitude': _currentPosition?.longitude,
+                                            'endlatitude': doc['latitude'],
+                                            'endlongitude': doc['longitude'],
+                                            'binname': doc['binname'],
+                                            'distance': distanceInKm,
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                          backgroundColor: Colors.white, // White button for contrast
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12), // Rounded button corners
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Check On Map',
+                                          style: TextStyle(
+                                            color: Color(0xFF43a047), // Matching button text color
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
+
                                 ],
                               ),
                             ),
