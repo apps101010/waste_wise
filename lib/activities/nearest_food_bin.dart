@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -417,7 +419,7 @@ class _NearestFoodBinState extends State<NearestFoodBin> {
             List<bool> foodAddedPerDay = List.from(goalData['foodAddedPerDay']);
             print(remaining);
             int todayIndex = DateTime.now().difference(startDate).inDays;
-            int finalRemaining = remaining - int.parse(foodQuantity);
+            int finalRemaining = max(0, remaining - int.parse(foodQuantity));
             print(finalRemaining);
             if (todayIndex >= 0 && todayIndex < foodAddedPerDay.length) {
               setState(() {
